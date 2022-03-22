@@ -10,7 +10,7 @@ from m3u8down import m3u8download
 
 # 单个视频解析下载类
 class huke88:
-    def __init__(self,url,Cookie):
+    def __init__(self,url,Cookie,sucai = False):
         self.url = url
         self.Cookie = Cookie
         self.headers = {
@@ -18,6 +18,7 @@ class huke88:
             'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.67'
         }
         self.title = ''
+        self.sucai = sucai
 
     def judge_type(self,url):
         if 'course' in url:
@@ -121,7 +122,6 @@ class huke88:
             print('无权限播放')
             pass
 
-
     def training_parse(self):
         training_id = re.findall('/(\d+).html', self.url)[0]
         posturl = "https://asyn.huke88.com/video/video-play"
@@ -167,6 +167,28 @@ class huke88:
             print('无权限播放')
             pass
 
+    def material_download(self, sucai_workdir='虎课素材'):
+
+        if os.path.exists(sucai_workdir) == False:
+            os.makedirs(sucai_workdir)
+        posturl = 'https://asyn.huke88.com/download/video-annex'
+
+        data = {
+            'id': re.findall('/(\d+).html', self.url)[0],
+            'type': '2',
+            '_csrf-frontend': self.get_csrf()
+        }
+        try:
+            response = requests.post(url=posturl, headers=self.headers, data=data).json()
+            download_url = response['download_url']
+            sucai_title = download_url.split('&')[0].split('=')[-1]
+            print(sucai_title, '素材下载中……')
+            sucai_response = requests.get(url=download_url, headers=self.headers, stream=True).content
+            with open(sucai_workdir + '/' + sucai_title, 'wb') as f:
+                f.write(sucai_response)
+                f.close()
+        except:
+            pass
 
     def run(self):
         _type = self.judge_type(self.url)
@@ -186,12 +208,13 @@ class huke88:
         m3u8url = m3u8url.replace('‾','~')
         print(title)
         m3u8download(M3u8url=m3u8url,WorkDir='Downloads',Title=title,Key=decryptkey)
+        # 素材下载
+        if self.sucai:
+            self.material_download()
+
 
 
 class GetList(huke88):
-    def __init__(self,url):
-        self.url = url
-
     def course_list(self):
         response = requests.get(url=self.url).text
         html = etree.HTML(response)
@@ -333,19 +356,24 @@ class GetList(huke88):
             return List2
         return List2
 
+
 if __name__ == '__main__':
     print('虎课视频下载器')
     print('使用方法：\n\t①输入Cookie（找cookie方法自行百度）\n\t②输入视频网址\n\t③选择下载序列\n\t④等待下载完成')
     Cookie = input('输入Cookie:')
+
+
     # Cookie = "uuid=f883d87042edaf5d1877f87c2860d1bb77bec8df05756668545dc9f26c3ce34ca%3A2%3A%7Bi%3A0%3Bs%3A4%3A%22uuid%22%3Bi%3A1%3Bs%3A32%3A%22aea6c38a0970357ebae20248a31f9036%22%3B%7D; seckill=1; FIRSTVISITED=1635748526.279; ISREQUEST=1; WEBPARAMS=is_pay=0; _identity-usernew=0c92c5a04674a9f4b36a395ee7da8e530349486bfbfa7381ef653b6f2799fff8a%3A2%3A%7Bi%3A0%3Bs%3A17%3A%22_identity-usernew%22%3Bi%3A1%3Bs%3A52%3A%22%5B5534102%2C%22qdtGTqTULPM0s9Cp2umHaleFsp5aCInD%22%2C2592000%5D%22%3B%7D; login-type=2786360247a6020d6206ee246d88ac1ebcd5b4b63683977f9b320bcc8d114ab4a%3A2%3A%7Bi%3A0%3Bs%3A10%3A%22login-type%22%3Bi%3A1%3Bs%3A2%3A%22qq%22%3B%7D; uv=0c8bfc8e06a6ff4c392382f254d7bc92992e6dd73b393a22ba5ba8bb9ef0f23da%3A2%3A%7Bi%3A0%3Bs%3A2%3A%22uv%22%3Bi%3A1%3Bs%3A32%3A%22ce04c308207d16d57e1c5e91c5ece34a%22%3B%7D; REFERRER_COME_HOST=f41e51d037c2897e57c2a9dda6442eb540fd29361836255fc46ff0fe0e64fb73a%3A2%3A%7Bi%3A0%3Bs%3A18%3A%22REFERRER_COME_HOST%22%3Bi%3A1%3Bi%3A1%3B%7D; requestChannel=2a2e8f4187d8c2d1ac0057c74606a5ebea6bbff8f61590ff5d9c3d561b298997a%3A2%3A%7Bi%3A0%3Bs%3A14%3A%22requestChannel%22%3Bi%3A1%3Bs%3A9%3A%22natural%7C%7C%22%3B%7D; REFERRER_STATISTICS_RECHARGE=096c63594052fffbd27ac43f2d47f3affad46597297e41b6434c92e4a95a0fd8a%3A2%3A%7Bi%3A0%3Bs%3A28%3A%22REFERRER_STATISTICS_RECHARGE%22%3Bi%3A1%3Bi%3A2001%3B%7D; firstVisitData=f0ac170349953e7aa56c125a729d73734b162028f76febf619d42bc8ec11bf44a%3A2%3A%7Bi%3A0%3Bs%3A14%3A%22firstVisitData%22%3Bi%3A1%3Bi%3A5534102%3B%7D; ALLVIP_EXPIRE_FIRST=fbe6d758848746f9fae60bd7dd86a07580d660ab49523e345ee8b1869424ee67a%3A2%3A%7Bi%3A0%3Bs%3A19%3A%22ALLVIP_EXPIRE_FIRST%22%3Bi%3A1%3Bi%3A1%3B%7D; middle-year=5fdda690a9e7df7631f1dce4059f117dcd93b489524b66bcf3fb4d35992dfc6ca%3A2%3A%7Bi%3A0%3Bs%3A11%3A%22middle-year%22%3Bi%3A1%3Bi%3A1%3B%7D; IPSTRATIFIED=966e40c1416b75359e7b3f341114a552dfae4dfca5e31e2507764146d446f05ca%3A2%3A%7Bi%3A0%3Bs%3A12%3A%22IPSTRATIFIED%22%3Bi%3A1%3Bi%3A1%3B%7D; ACTIVITY_20201221=1; _csrf-frontend=756349bb7297786377fc0d857c4b3a1b86f7d806da9f06a87c0d673dfce8b61aa%3A2%3A%7Bi%3A0%3Bs%3A14%3A%22_csrf-frontend%22%3Bi%3A1%3Bs%3A32%3A%22jyuGikJIOmkUBQ0w0gwSmcGSxlS9Kd2o%22%3B%7D; advanced-frontend=ns7lbl8c9kah6h9d4dphi7rgs4"
     while True:
         url = input('输入视频网址：')
+        sucai = True if input('是否下载素材(y/n):') == 'y'else False
+
         # huke88(url=url, Cookie=Cookie).run()
         try:
-            Urls = GetList(url).run()
+            Urls = GetList(url=url,Cookie=Cookie).run()
             for url in Urls:
                 print(url)
-                huke88(url=url, Cookie=Cookie).run()
+                huke88(url=url, Cookie=Cookie,sucai=sucai).run()
         except Exception as e:
             logging.exception(e)
 
