@@ -1,4 +1,4 @@
-# 一个关于huke的解析代码
+# 一个关于虎课的解析代码
 
 ## 支持类型
 
@@ -8,6 +8,8 @@
 4. career https://huke88.com/career/25.html
 5. training https://huke88.com/training/1588.html
 6. keyWorld(没拼错……) https://huke88.com/search/video?keyWorld=ps
+
+支持配套课程下载
 
 ## 用法
 
