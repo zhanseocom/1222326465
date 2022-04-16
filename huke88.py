@@ -359,7 +359,7 @@ class GetList(huke88):
 
 if __name__ == '__main__':
     print('虎课视频下载器')
-    print('使用方法：\n\t①输入Cookie（找cookie方法自行百度）\n\t②输入视频网址\n\t③选择下载序列\n\t④等待下载完成')
+    print('使用方法：\n\t①输入Cookie\n\t②输入视频网址\n\t③选择下载序列(例如1-5)\n\t④等待下载完成')
     Cookie = input('输入Cookie:')
 
 
